@@ -1,18 +1,29 @@
 # from django.shortcuts import get_object_or_404
-from rest_framework import viewsets   # , filters, permissions,
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import viewsets
+
 
 from reviews.models import Category, Genre, Titles
-# from .permissions import IsAuthorOrReadOnly
-# from .serializers import CommentSerializer, FollowSerializer, \
-#     GroupSerializer, PostSerializer
+from .permissions import IsAdminOrReadOnly
+from .serializers import CategorySerializer, GenreSerializer, \
+    TitlesSerializer
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    permission_classes = (IsAdminOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Titles.objects.all()
+    serializer_class = TitlesSerializer
+    permission_classes = (IsAdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('title', 'year', 'category', 'genre')
 
 
 class GenreViewSet(viewsets.ModelViewSet):
-    pass
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrReadOnly,)
