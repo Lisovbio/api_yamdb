@@ -1,3 +1,4 @@
+# Не применяется импорт
 import datetime as dt
 
 from rest_framework import serializers
@@ -5,7 +6,8 @@ from rest_framework import serializers
 from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 
-from reviews.models import Category, Comment, Genre, Review, Title, User
+from reviews.models import Category, Genre, Titles, User
+# В ревью нет файла validators
 from reviews.validators import validate_username
 
 

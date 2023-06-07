@@ -1,5 +1,6 @@
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
+# В моделях нет Comment и Review
 from reviews.models import ROLE_LIST, Comment, Review, User
 
 
@@ -22,6 +23,7 @@ class OnlyAdminPermission(BasePermission):
         return ((request.user.is_authenticated
                 and request.user.role == ROLE_LIST.admin.value)
                 or request.user.is_superuser)
+
 
 class CustomPermission(BasePermission):
     """Разрешение на всё views, кроме 'только для admin'"""

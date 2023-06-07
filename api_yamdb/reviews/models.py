@@ -3,11 +3,12 @@ import random
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
+# Не используется MaxValueValidator и MinValueValidator
 from django.core.validators import (
     MaxValueValidator, MinValueValidator, RegexValidator,
 )
 from django.db import models
-
+# Нет файла validators, откуда импорт?
 from .validators import regex_validator, validate_username
 
 CHARS_TO_SHOW = 15
@@ -18,11 +19,17 @@ class Category(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField()
 
+    def __str__(self):
+        return self.name
+
 
 class Genre(models.Model):
     name = models.CharField('Жанр', max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField()
+
+    def __str__(self):
+        return self.name
 
 
 class Titles(models.Model):
