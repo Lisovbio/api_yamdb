@@ -4,12 +4,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 # Не используется MaxValueValidator и MinValueValidator
-from django.core.validators import (
-    MaxValueValidator, MinValueValidator, RegexValidator,
-)
+# from django.core.validators import (
+#     MaxValueValidator, MinValueValidator, RegexValidator,
+# )
 from django.db import models
 # Нет файла validators, откуда импорт?
-from .validators import regex_validator, validate_username
+# from .validators import regex_validator, validate_username
 
 CHARS_TO_SHOW = 15
 
@@ -115,19 +115,21 @@ class User(AbstractUser):
         verbose_name='Логин',
         help_text='Укажите логин',
         unique=True,
-        validators=[RegexValidator(regex=r'^[\w.@+-]+$'), validate_username]
+        # validators=[RegexValidator(regex=r'^[\w.@+-]+$'), validate_username]
     )
 
     bio = models.TextField(
         'Биография',
         blank=True,
     )
+
     role = models.CharField(
         'Роль пользователя',
         choices=[(role.value, role.name) for role in ROLE_LIST],
         max_length=10,
         default='user'
     )
+
     confirmation_code = models.CharField(
         'Код подтверждения', max_length=9, blank=True
     )
