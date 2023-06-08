@@ -4,13 +4,13 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
 # Не используется MaxValueValidator и MinValueValidator
-# from django.core.validators import (
-#     MaxValueValidator, MinValueValidator, RegexValidator,
-# )
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator, RegexValidator,
+)
 from django.db import models
 <<<<<<< HEAD
 # Нет файла validators, откуда импорт?
-# from .validators import regex_validator, validate_username
+from .validators import regex_validator, validate_username
 
 CHARS_TO_SHOW = 15
 =======
@@ -18,7 +18,6 @@ from django.contrib.auth import get_user_model
 
 
 User = get_user_model()
->>>>>>> reviews
 
 
 class Category(models.Model):

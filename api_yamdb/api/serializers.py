@@ -2,7 +2,6 @@
 # import datetime as dt
 
 from rest_framework import serializers
-<<<<<<< HEAD
 
 # from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
@@ -10,9 +9,7 @@ from django.shortcuts import get_object_or_404
 from reviews.models import Category, Genre, Titles, User
 # В ревью нет файла validators
 from reviews.validators import validate_username
-=======
 from reviews.models import Category, Genre, Titles, Review, Comment
->>>>>>> reviews
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -43,10 +40,10 @@ class RegistrationSerializer(serializers.ModelSerializer):
     username = serializers.CharField(
         required=True,
         max_length=150,
-        # validators=[
-        #     RegexValidator(r'^[\w.+-]+\Z', 'Enter a valid username.'),
-        #     validate_username
-        # ],
+        validators=[
+            RegexValidator(r'^[\w.+-]+\Z', 'Enter a valid username.'),
+            validate_username
+        ],
     )
     email = serializers.EmailField(required=True, max_length=254)
 
