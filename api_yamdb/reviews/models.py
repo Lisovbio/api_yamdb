@@ -3,22 +3,18 @@ import random
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.mail import send_mail
-# Не используется MaxValueValidator и MinValueValidator
 from django.core.validators import (
     MaxValueValidator, MinValueValidator, RegexValidator,
 )
 from django.db import models
-<<<<<<< HEAD
 # Нет файла validators, откуда импорт?
-from .validators import regex_validator, validate_username
-
-CHARS_TO_SHOW = 15
-=======
+# а куда regex_validator используем??
+from validators import regex_validator, validate_username
 from django.contrib.auth import get_user_model
 
 
+CHARS_TO_SHOW = 15
 User = get_user_model()
->>>>>>> reviews
 
 
 class Category(models.Model):
@@ -64,7 +60,6 @@ class Titles(models.Model):
         return self.title
 
 
-<<<<<<< HEAD
 class ROLE_LIST(enum.Enum):
     admin = 'admin'
     user = 'user'
@@ -147,7 +142,8 @@ class User(AbstractUser):
     def create_jwt_token(self):
         refresh = RefreshToken.for_user(self)
         return str(refresh.access_token)
-=======
+
+
 class Review(models.Model):
     text = models.TextField("место для текста")
     author = models.ForeignKey(
@@ -156,7 +152,17 @@ class Review(models.Model):
         related_name='reviews',
         verbose_name="Автор"
     )
-    score = models.IntegerField("рейтинг")
+    score = models.IntegerField(
+        "рейтинг",
+        validators=[
+            MaxValueValidator(
+                limit_value=10, message="Выберите число не больше 10"
+            ),
+            MinValueValidator(
+                limit_value=1, message="Выберите число не меньше 1"
+            )
+        ]
+    )
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
     title = models.ForeignKey(
@@ -193,4 +199,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.text[:20]} для {self.review}'
->>>>>>> reviews
