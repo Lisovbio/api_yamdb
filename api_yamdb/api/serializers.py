@@ -2,13 +2,17 @@
 # import datetime as dt
 
 from rest_framework import serializers
+<<<<<<< HEAD
 
 # from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 
 from reviews.models import Category, Genre, Titles, User
 # В ревью нет файла validators
-# from reviews.validators import validate_username
+from reviews.validators import validate_username
+=======
+from reviews.models import Category, Genre, Titles, Review, Comment
+>>>>>>> reviews
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -32,6 +36,7 @@ class TitlesSerializer(serializers.ModelSerializer):
         model = Titles
 
 
+<<<<<<< HEAD
 class RegistrationSerializer(serializers.ModelSerializer):
 
     password = serializers.CharField(required=False, write_only=True)
@@ -110,3 +115,24 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'bio',
                   'role')
+=======
+class ReviewSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        model = Review
+        exclude = ('title',)
+
+
+class CommentSerializer(serializers.ModelSerializer):
+    author = serializers.SlugRelatedField(
+        read_only=True, slug_field='username'
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Comment
+        read_only_fields = ('review',)
+>>>>>>> reviews
