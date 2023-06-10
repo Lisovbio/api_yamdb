@@ -31,7 +31,13 @@ class GenreViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+<<<<<<< HEAD
     permission_classes = (CustomPermission,)
+=======
+    permission_classes = [
+        IsAuthenticatedOrReadOnly, IsAuthorPermission
+    ]
+>>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 
     def get_queryset(self):
         title = get_object_or_404(Review, pk=self.kwargs.get('title_id'))
@@ -45,7 +51,13 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
+<<<<<<< HEAD
     permission_classes = (CustomPermission,)
+=======
+    permission_classes = [
+        IsAuthenticatedOrReadOnly, IsAuthorPermission
+    ]
+>>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))

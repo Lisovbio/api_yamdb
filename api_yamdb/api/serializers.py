@@ -1,10 +1,23 @@
+<<<<<<< HEAD
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
+=======
+# Не применяется импорт
+# import datetime as dt
+
+from rest_framework import serializers
+
+# from django.core.validators import RegexValidator
+>>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Titles, User
 # В ревью нет файла validators
 from reviews.validators import validate_username
+<<<<<<< HEAD
+=======
+from reviews.models import Category, Genre, Titles, Review, Comment
+>>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 
 
 class CategorySerializer(serializers.ModelSerializer):
