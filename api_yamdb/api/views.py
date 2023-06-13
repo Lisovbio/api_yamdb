@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 
-from reviews.models import Category, Genre, Titles, Review
+from reviews.models import Category, Genre, Titles, Review, CustomUserManager, User
 from .permissions import IsAdminOrReadOnly, CustomPermission
 from .serializers import CategorySerializer, GenreSerializer, \
     TitlesSerializer, CommentSerializer, ReviewSerializer

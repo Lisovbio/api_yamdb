@@ -7,9 +7,7 @@ from django.core.validators import (
     MaxValueValidator, MinValueValidator, RegexValidator,
 )
 from django.db import models
-# Нет файла validators, откуда импорт?
-# а куда regex_validator используем??
-from validators import regex_validator, validate_username
+from .validators import validate_username
 from django.contrib.auth import get_user_model
 
 
@@ -200,4 +198,4 @@ class Comment(models.Model):
     def __str__(self):
         return f'{self.text[:20]} для {self.review}'
 
-#прошу не обращать внимания
+# прошу не обращать внимания
