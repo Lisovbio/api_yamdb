@@ -3,8 +3,8 @@ from django.core.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Titles, User
-# В ревью нет файла validators
 from reviews.validators import validate_username
+from rest_framework.validators import UniqueValidator
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -102,10 +102,66 @@ class RetrieveUpdateUserSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+\Z',
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        max_length=150,
+    )
+    email = serializers.EmailField(
+        required=True,
+        validators=[UniqueValidator(queryset=User.objects.all())],
+        max_length=254,
+    )
+
+    class Meta:
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role',)
+        model = User
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя me нельзя использовать'
+            )
+        if User.objects.filter(username=value).exists():
+            return serializers.ValidationError(
+                'Пользователя с таким именем уже существует')
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            return serializers.ValidationError(
+                'Данный Email уже используется')
+        return value
+
+
+class UserRegistrationSerializer(serializers.Serializer):
+    username = serializers.RegexField(
+        regex=r'^[\w.@+-]+\Z',
+        required=True,
+        max_length=150,
+    )
+    email = serializers.EmailField(
+        required=True,
+        max_length=254,
+    )
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                'Имя me нельзя использовать'
+            )
+        return value
+
+
+class UserTokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(required=True)
+    confirmation_code = serializers.CharField(required=True)
+
     class Meta:
         model = User
-        fields = ('username', 'email', 'first_name', 'last_name', 'bio',
-                  'role')
+        fields = ('username', 'confirmation_code')
 
 
 class ReviewSerializer(serializers.ModelSerializer):

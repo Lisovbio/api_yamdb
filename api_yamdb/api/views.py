@@ -9,6 +9,7 @@ from .serializers import CategorySerializer, GenreSerializer, \
     TitlesSerializer, CommentSerializer, ReviewSerializer
 
 
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
