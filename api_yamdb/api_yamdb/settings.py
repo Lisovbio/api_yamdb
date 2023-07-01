@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'api',
-    'reviews'
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -120,7 +120,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 }
 
-AUTH_USER_MODEL = 'reviews.User'
+AUTH_USER_MODEL = "users_management.UserManage"
 
 
 EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'

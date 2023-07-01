@@ -4,7 +4,7 @@ from rest_framework import viewsets
 
 
 from reviews.models import Category, Genre, Titles, Review
-from .permissions import IsAdminOrReadOnly, CustomPermission
+from .permissions import IsAdminUserOrReadOnly, IsAuthenticatedOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, \
     TitlesSerializer, CommentSerializer, ReviewSerializer
 
@@ -12,13 +12,13 @@ from .serializers import CategorySerializer, GenreSerializer, \
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUserOrReadOnly,)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     queryset = Titles.objects.all()
     serializer_class = TitlesSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUserOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_fields = ('title', 'year', 'category', 'genre')
 
@@ -26,18 +26,14 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(viewsets.ModelViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrReadOnly,)
+    permission_classes = (IsAdminUserOrReadOnly,)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-<<<<<<< HEAD
-    permission_classes = (CustomPermission,)
-=======
     permission_classes = [
-        IsAuthenticatedOrReadOnly, IsAuthorPermission
+        IsAuthenticatedOrReadOnly
     ]
->>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 
     def get_queryset(self):
         title = get_object_or_404(Review, pk=self.kwargs.get('title_id'))
@@ -51,13 +47,9 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
-<<<<<<< HEAD
-    permission_classes = (CustomPermission,)
-=======
     permission_classes = [
-        IsAuthenticatedOrReadOnly, IsAuthorPermission
+        IsAuthenticatedOrReadOnly
     ]
->>>>>>> a6d2f624574376fb2c9b3ab946b560737406a602
 
     def get_queryset(self):
         review = get_object_or_404(Review, pk=self.kwargs.get('review_id'))
