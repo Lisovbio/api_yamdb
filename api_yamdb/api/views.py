@@ -3,10 +3,20 @@ from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
 
 
-from reviews.models import Category, Genre, Titles, Review
-from .permissions import IsAdminUserOrReadOnly, IsAuthenticatedOrReadOnly
+from reviews.models import Category, Genre, Titles, Review, User
+from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
+    IsAuthenticatedOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, \
-    TitlesSerializer, CommentSerializer, ReviewSerializer
+    TitlesSerializer, CommentSerializer, ReviewSerializer, UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    lookup_field = 'username'
+    permission_classes = [AdminOnly]
+    filter_backends = [DjangoFilterBackend]
+    search_fields = ['user__username', ]
 
 
 class CategoryViewSet(viewsets.ModelViewSet):
