@@ -142,8 +142,6 @@ class SignUpView(APIView):
 
     def send_confirmation_code(self, user):
         confirmation_code = default_token_generator.make_token(user)
-        user.confirmation_code = confirmation_code
-        user.save()
         return send_mail(
             'Код подтверждения',
             'Код подтверждения {0}'.format(confirmation_code),
@@ -157,13 +155,12 @@ class SignUpView(APIView):
         serializer.is_valid(raise_exception=True)
         try:
             user, created = User.objects.get_or_create(
-                username=serializer.validated_data['username'],
-                email=serializer.validated_data['email'],
+                username=serializer.validated_data.get('username'),
+                email=serializer.validated_data.get('email'),
             )
             if not created:
-                if user.is_activated:
+                if False: #user.is_activated: Пока заглушка, надо чинить
                     return Response(
-                        'Пользователь уже активирован.',
                         status=status.HTTP_400_BAD_REQUEST,
                     )
                 else:

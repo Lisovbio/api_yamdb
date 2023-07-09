@@ -133,4 +133,4 @@ SIMPLE_JWT = {
 
 USERNAME_LENGTH = 150
 EMAIL_LENGTH = 254
-DEFAULT_FROM_EMAIL = 'slop@mail.ru'
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'

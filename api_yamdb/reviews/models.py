@@ -15,12 +15,16 @@ ROLES = (
 
 class User(AbstractUser):
     bio = models.TextField(blank=True)
-
-    username = models.CharField(blank=False, max_length=150,
-                                unique=True)
-    email = models.EmailField(blank=False, max_length=254,
-                              unique=True)
-    role = models.CharField(max_length=20, choices=ROLES, default='user')
+    username = models.CharField(
+        max_length=150,
+        unique=True
+    )
+    email = models.EmailField(
+        max_length=254,
+        unique=True
+    )
+    role = models.CharField(
+        max_length=20, choices=ROLES, default='user')
 
     class Meta:
         verbose_name = "Пользователь"

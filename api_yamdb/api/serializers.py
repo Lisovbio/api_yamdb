@@ -222,7 +222,7 @@ class SignUpSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 'Пользователь me не может быть создан',
             )
-        return User
+        return user
 
 
 class NotAdminSerializer(serializers.ModelSerializer):
