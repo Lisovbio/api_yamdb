@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'api',
-    'djoser'
     'reviews',
 ]
 
@@ -131,3 +130,7 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=25),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+USERNAME_LENGTH = 150
+EMAIL_LENGTH = 254
+DEFAULT_FROM_EMAIL = 'slop@mail.ru'
