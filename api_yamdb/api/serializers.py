@@ -6,7 +6,6 @@ from django.core.validators import RegexValidator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Titles, User
-# В ревью нет файла validators
 from reviews.validators import validate_username
 from reviews.models import Category, Genre, Titles, Review, Comment
 from rest_framework.validators import UniqueValidator
