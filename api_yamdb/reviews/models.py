@@ -22,6 +22,10 @@ class User(AbstractUser):
                               unique=True)
     role = models.CharField(max_length=20, choices=ROLES, default='user')
 
+    class Meta:
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+
     def __str__(self):
         return self.username
 
@@ -42,6 +46,10 @@ class Category(models.Model):
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField()
 
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
+
     def __str__(self):
         return self.name
 
@@ -50,6 +58,10 @@ class Genre(models.Model):
     name = models.CharField('Жанр', max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
     description = models.TextField()
+
+    class Meta:
+        verbose_name = "Жанр"
+        verbose_name_plural = "Жанры"
 
     def __str__(self):
         return self.name
@@ -75,6 +87,10 @@ class Titles(models.Model):
         null=True
     )
     description = models.TextField()
+
+    class Meta:
+        verbose_name = "Название"
+        verbose_name_plural = "Названия"
 
     def __str__(self):
         return self.title

@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from django.core.validators import RegexValidator
@@ -196,3 +197,39 @@ class CommentSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Comment
         read_only_fields = ('review',)
+
+
+class SignUpSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        validators=(
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ'),
+        ),
+        required=True,
+    )
+    email = serializers.EmailField(
+        max_length=settings.EMAIL_LENGTH,
+        required=True,
+    )
+
+    class Meta:
+        model = User
+        fields = ('username', 'email')
+
+    def validate_username(self, user):
+        if user.lower() == 'me':
+            raise serializers.ValidationError(
+                'Пользователь me не может быть создан',
+            )
+        return User
+
+
+class NotAdminSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = (
+            'username', 'email', 'first_name',
+            'last_name', 'bio', 'role')
+        read_only_fields = ('role',)
