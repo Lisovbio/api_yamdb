@@ -1,13 +1,9 @@
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
-<<<<<<< HEAD
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-=======
-from rest_framework.permissions import AllowAny
->>>>>>> b9b0f7c97cf68603c6f2be71858c7151f969817f
 from rest_framework.views import APIView
 from django.contrib.auth.tokens import default_token_generator
 from rest_framework import status, viewsets
@@ -19,12 +15,8 @@ from rest_framework_simplejwt.tokens import AccessToken
 from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
     IsAuthenticatedOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, \
-<<<<<<< HEAD
     TitlesSerializer, CommentSerializer, ReviewSerializer, UserSerializer, \
     GetTokenSerializer, SignUpSerializer, NotAdminSerializer
-=======
-    TitlesSerializer, CommentSerializer, ReviewSerializer, UserSerializer, GetTokenSerializer, SignUpSerializer
->>>>>>> b9b0f7c97cf68603c6f2be71858c7151f969817f
 
 
 class UserViewSet(viewsets.ModelViewSet):
