@@ -159,7 +159,7 @@ class SignUpView(APIView):
                 email=serializer.validated_data.get('email'),
             )
             if not created:
-                if False: #user.is_activated: Пока заглушка, надо чинить
+                if user.is_activated:
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                     )
