@@ -1,48 +1,89 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (
-    MaxValueValidator, MinValueValidator
-)
+from django.core.validators import (MaxValueValidator, MinValueValidator,
+                                    RegexValidator)
 from django.db import models
+from django.conf import settings
 
 CHARS_TO_SHOW = 15
 
-ROLES = (
-        ('user', 'User'),
-        ('moderator', 'Moderator'),
-        ('admin', 'Admin'),
-)
-
 
 class User(AbstractUser):
-    bio = models.TextField(blank=True)
     username = models.CharField(
-        max_length=150,
-        unique=True
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Имя пользователя',
+        unique=True,
+        blank=False,
+        null=False,
+        validators=(
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ'),
+        ),
     )
     email = models.EmailField(
-        max_length=254,
-        unique=True
+        max_length=settings.EMAIL_LENGTH,
+        verbose_name='Email',
+        unique=True,
+        blank=False,
+        null=False,
     )
     role = models.CharField(
-        max_length=20, choices=ROLES, default='user')
+        max_length=settings.ROLE_LENGTH,
+        choices=settings.ROLE_CHOICES,
+        verbose_name='Фамилия',
+        default='user',
+        blank=False,
+        null=False,
+    )
+    bio = models.TextField(
+        verbose_name='О себе',
+        blank=True,
+    )
+    first_name = models.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Имя',
+        blank=True,
+    )
+    last_name = models.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Фамилия',
+        null=True,
+    )
+
+    confirmation_code = models.CharField(
+        max_length=settings.CONFIRMATION_CODE_LENGTH,
+        verbose_name='Фамилия',
+        null=True,
+        blank=False,
+    )
+    is_activated = models.BooleanField(
+        default=False,
+        verbose_name='Статус активации',
+    )
 
     class Meta:
-        verbose_name = "Пользователь"
-        verbose_name_plural = "Пользователи"
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email',
+            ),
+        ]
 
     def __str__(self):
         return self.username
 
     @property
     def is_admin(self):
-        return self.role == 'admin' or self.is_superuser
+        return any(
+            [self.role == 'admin', self.is_superuser],
+        )
 
     @property
     def is_moderator(self):
-        return self.role == 'moderator'
-
-    class Meta:
-        ordering = ['username']
+        return self.role == settings.MODERATOR
 
 
 class Category(models.Model):

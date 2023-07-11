@@ -23,9 +23,10 @@ class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     lookup_field = 'username'
-    permission_classes = (AdminOnly,)
-    filter_backends = [DjangoFilterBackend]
-    search_fields = ['user__username', ]
+    permission_classes = (IsAuthenticated, AdminOnly,)
+    filter_backends = (SearchFilter, )
+    search_fields = ('username', )
+    http_method_names = ['get', 'post', 'patch', 'delete']
 
     @action(
         methods=['GET', 'PATCH'],
@@ -39,12 +40,14 @@ class UserViewSet(viewsets.ModelViewSet):
                 serializer = UserSerializer(
                     request.user,
                     data=request.data,
-                    partial=True)
+                    partial=True
+                )
             else:
                 serializer = NotAdminSerializer(
                     request.user,
                     data=request.data,
-                    partial=True)
+                    partial=True
+                )
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
@@ -159,7 +162,7 @@ class SignUpView(APIView):
                 email=serializer.validated_data.get('email'),
             )
             if not created:
-                if False: #user.is_activated: Пока заглушка, надо чинить
+                if False:  #user.is_activated:
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                     )

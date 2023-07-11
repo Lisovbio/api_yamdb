@@ -67,28 +67,17 @@ class RegistrationSerializer(serializers.ModelSerializer):
 
 class GetTokenSerializer(serializers.Serializer):
 
-    email = serializers.EmailField(write_only=True, max_length=256),
-    confirmation_code = serializers.CharField(write_only=True),
-    token = serializers.CharField(read_only=True)
+    username = serializers.CharField(
+        required=True)
+    confirmation_code = serializers.CharField(
+        required=True)
 
-    def validate(self, data):
-        username = self.initial_data.get('username', None)
-        confirmation_code = self.initial_data.get('confirmation_code', None)
-        if username is None:
-            raise serializers.ValidationError(
-                'Требуется username!'
-            )
-        if (confirmation_code is None
-            or confirmation_code != get_object_or_404(
-                User,
-                username=username).confirmation_code):
-            raise serializers.ValidationError(
-                'confirmation_code некорректен!'
-            )
-        user = get_object_or_404(User,
-                                 username=username,
-                                 confirmation_code=confirmation_code)
-        return {'token': user.create_jwt_token}
+    class Meta:
+        model = User
+        fields = (
+            'username',
+            'confirmation_code'
+        )
 
 
 class RetrieveUpdateUserSerializer(serializers.ModelSerializer):
