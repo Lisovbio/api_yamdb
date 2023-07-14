@@ -3,7 +3,6 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 
 from django.core.validators import RegexValidator
-from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from reviews.models import Category, Comment, Genre, Review, Titles, User
 from reviews.validators import validate_username
@@ -25,7 +24,29 @@ class GenreSerializer(serializers.ModelSerializer):
         model = Genre
 
 
-class TitlesSerializer(serializers.ModelSerializer):
+class TitleReadSerializer(serializers.ModelSerializer):
+    category = CategorySerializer(read_only=True)
+    genre = GenreSerializer(
+        read_only=True,
+        many=True
+    )
+    rating = serializers.IntegerField(read_only=True)
+
+    class Meta:
+        fields = '__all__'
+        model = Titles
+
+
+class TitleWriteSerializer(serializers.ModelSerializer):
+    category = serializers.SlugRelatedField(
+        queryset=Category.objects.all(),
+        slug_field='slug'
+    )
+    genre = serializers.SlugRelatedField(
+        queryset=Genre.objects.all(),
+        slug_field='slug',
+        many=True
+    )
 
     class Meta:
         fields = '__all__'

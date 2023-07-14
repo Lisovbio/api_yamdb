@@ -42,7 +42,7 @@ with open('titles.csv', mode="r", encoding="utf-8") as file:
     for row in reader:
         db = Titles(
             id=row['id'],
-            title=row['name'],
+            name=row['name'],
             year=row['year'],
             category=Category.objects.get(id=row['category'])
         )

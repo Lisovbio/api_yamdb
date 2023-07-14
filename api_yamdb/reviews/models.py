@@ -1,9 +1,11 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import (MaxValueValidator, MinValueValidator,
-                                    RegexValidator)
+from django.core.validators import (
+    MaxValueValidator, MinValueValidator, RegexValidator
+)
 from django.db import models
 from django.conf import settings
 
+from .validators import validate_username, validate_year
 CHARS_TO_SHOW = 15
 
 
@@ -89,7 +91,6 @@ class User(AbstractUser):
 class Category(models.Model):
     name = models.CharField('Категория', max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField()
 
     class Meta:
         verbose_name = "Категория"
@@ -102,43 +103,51 @@ class Category(models.Model):
 class Genre(models.Model):
     name = models.CharField('Жанр', max_length=200)
     slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField()
 
     class Meta:
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.name}'
 
 
 class Titles(models.Model):
-    title = models.CharField('Название произведения', max_length=200)
-    year = models.IntegerField('Дата выхода')
+    name = models.CharField(
+        'название',
+        max_length=200,
+        db_index=True
+    )
+    year = models.IntegerField(
+        'год',
+        validators=(validate_year, )
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Название',
-        blank=True,
-        null=True
+        verbose_name='категория',
+        null=True,
+        blank=True
     )
-    genre = models.ForeignKey(
+    description = models.TextField(
+        'описание',
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Жанр',
-        blank=True,
-        null=True
+        verbose_name='жанр'
     )
-    description = models.TextField()
 
     class Meta:
-        verbose_name = "Название"
-        verbose_name_plural = "Названия"
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
-        return self.title
+        return self.name
 
 
 class Review(models.Model):

@@ -1,3 +1,4 @@
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
@@ -10,13 +11,15 @@ from rest_framework import status, viewsets
 from django.db import IntegrityError
 from rest_framework.response import Response
 from django.core.mail import send_mail
-from reviews.models import Category, Genre, Titles, Review, User
 from rest_framework_simplejwt.tokens import AccessToken
+from reviews.models import Category, Genre, Titles, Review, User
+from api.filter import TitleFilter
 from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
     IsAuthenticatedOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, \
-    TitlesSerializer, CommentSerializer, ReviewSerializer, UserSerializer, \
-    GetTokenSerializer, SignUpSerializer, NotAdminSerializer
+    TitleReadSerializer, TitleWriteSerializer, CommentSerializer, \
+    ReviewSerializer, UserSerializer, GetTokenSerializer, SignUpSerializer, \
+    NotAdminSerializer
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -32,7 +35,8 @@ class UserViewSet(viewsets.ModelViewSet):
         methods=['GET', 'PATCH'],
         detail=False,
         permission_classes=(IsAuthenticated,),
-        url_path='me')
+        url_path='me'
+    )
     def get_current_user_info(self, request):
         serializer = UserSerializer(request.user)
         if request.method == 'PATCH':
@@ -64,11 +68,17 @@ class CategoryViewSet(viewsets.ModelViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.all()
-    serializer_class = TitlesSerializer
+    queryset = Titles.objects.annotate(
+        rating=Avg('reviews__score')
+    ).all()
     permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (DjangoFilterBackend,)
-    filterset_fields = ('title', 'year', 'category', 'genre')
+    filter_backends = (DjangoFilterBackend, )
+    filterset_class = TitleFilter
+
+    def get_serializer_class(self):
+        if self.action in ('list', 'retrieve'):
+            return TitleReadSerializer
+        return TitleWriteSerializer
 
 
 class GenreViewSet(viewsets.ModelViewSet):
@@ -162,7 +172,7 @@ class SignUpView(APIView):
                 email=serializer.validated_data.get('email'),
             )
             if not created:
-                if False:  #user.is_activated:
+                if user.is_activated:
                     return Response(
                         status=status.HTTP_400_BAD_REQUEST,
                     )
