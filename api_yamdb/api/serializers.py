@@ -4,9 +4,8 @@ from django.core.exceptions import ValidationError
 
 from django.core.validators import RegexValidator
 from rest_framework import serializers
-from reviews.models import Category, Comment, Genre, Review, Titles, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 from reviews.validators import validate_username
-from reviews.models import Category, Genre, Titles, Review, Comment
 from rest_framework.validators import UniqueValidator
 
 
@@ -33,7 +32,7 @@ class TitleReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
 
 class TitleWriteSerializer(serializers.ModelSerializer):
@@ -49,7 +48,7 @@ class TitleWriteSerializer(serializers.ModelSerializer):
 
     class Meta:
         fields = '__all__'
-        model = Titles
+        model = Title
 
 
 class RegistrationSerializer(serializers.ModelSerializer):

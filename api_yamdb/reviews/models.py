@@ -5,7 +5,7 @@ from django.core.validators import (
 from django.db import models
 from django.conf import settings
 
-from .validators import validate_username, validate_year
+from .validators import validate_year
 CHARS_TO_SHOW = 15
 
 
@@ -112,7 +112,7 @@ class Genre(models.Model):
         return self.name
 
 
-class Titles(models.Model):
+class Title(models.Model):
     name = models.CharField(
         'название',
         max_length=200,
@@ -172,7 +172,7 @@ class Review(models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         verbose_name="произведение",
         related_name="reviews"
@@ -181,6 +181,11 @@ class Review(models.Model):
     class Meta:
         verbose_name = "Отзыв"
         verbose_name_plural = "Отзывы"
+        constraints = [
+            models.UniqueConstraint(
+                fields=('title', 'author', ),
+                name='unique review'
+            )]
 
     def __str__(self):
         return f'{self.text[:20]} для {self.title}'

@@ -5,7 +5,7 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "api_yamdb.settings")
 django.setup()
 
 from api_yamdb.settings import BASE_DIR
-from reviews.models import Category, Comment, Genre, Review, Titles, User
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 path = os.path.join(BASE_DIR, 'static/data/')
 os.chdir(path)
@@ -40,7 +40,7 @@ with open('genre.csv', mode="r", encoding="utf-8") as file:
 with open('titles.csv', mode="r", encoding="utf-8") as file:
     reader = csv.DictReader(file)
     for row in reader:
-        db = Titles(
+        db = Title(
             id=row['id'],
             name=row['name'],
             year=row['year'],
@@ -73,7 +73,7 @@ with open('review.csv', mode="r", encoding="utf-8") as file:
     for row in reader:
         db = Review(
             id=row['id'],
-            title=Titles.objects.get(id=row['title_id']),
+            title=Title.objects.get(id=row['title_id']),
             text=row['text'],
             author=User.objects.get(id=row['author']),
             score=row['score'],

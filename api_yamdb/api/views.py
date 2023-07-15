@@ -12,11 +12,11 @@ from django.db import IntegrityError
 from rest_framework.response import Response
 from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Titles, Review, User
+from reviews.models import Category, Genre, Title, Review, User
 from api.filter import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
-    IsAuthenticatedOrReadOnly
+    AdminModeratorAuthorPermission
 from .serializers import CategorySerializer, GenreSerializer, \
     TitleReadSerializer, TitleWriteSerializer, CommentSerializer, \
     ReviewSerializer, UserSerializer, GetTokenSerializer, SignUpSerializer, \
@@ -69,7 +69,7 @@ class CategoryViewSet(ListCreateDestroyViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Titles.objects.annotate(
+    queryset = Title.objects.annotate(
         rating=Avg('reviews__score')
     ).all()
     permission_classes = (IsAdminUserOrReadOnly,)
@@ -93,24 +93,22 @@ class GenreViewSet(ListCreateDestroyViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
-    permission_classes = [
-        IsAuthenticatedOrReadOnly
-    ]
+    permission_classes = (AdminModeratorAuthorPermission, )
 
     def get_queryset(self):
-        title = get_object_or_404(Review, pk=self.kwargs.get('title_id'))
-        queryset = title.comments.all()
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        queryset = title.reviews.all()
         return queryset
 
     def perform_create(self, serializer):
-        title = get_object_or_404(Titles, pk=self.kwargs.get('title_id'))
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
         serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
     permission_classes = [
-        IsAuthenticatedOrReadOnly
+        AdminModeratorAuthorPermission
     ]
 
     def get_queryset(self):
