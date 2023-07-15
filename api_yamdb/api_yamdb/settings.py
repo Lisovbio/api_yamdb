@@ -26,7 +26,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'api',
-    'reviews'
+    'reviews',
 ]
 
 MIDDLEWARE = [
@@ -116,7 +116,8 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_PAGINATION_CLASS':
+        'rest_framework.pagination.LimitOffsetPagination',
     'PAGE_SIZE': 10,
 }
 
@@ -130,3 +131,23 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=25),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+USERNAME_LENGTH = 150
+EMAIL_LENGTH = 254
+DEFAULT_FROM_EMAIL = 'webmaster@localhost'
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+USER = 'user'
+ROLE_LENGTH = 14
+CONFIRMATION_CODE_LENGTH = 254
+ADMIN = 'admin'
+MODERATOR = 'moderator'
+USER = 'user'
+ROLE_LENGTH = 14
+CONFIRMATION_CODE_LENGTH = 254
+
+ROLE_CHOICES = (
+    (ADMIN, ADMIN),
+    (MODERATOR, MODERATOR),
+    (USER, USER),
+)

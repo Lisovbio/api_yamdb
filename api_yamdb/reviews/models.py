@@ -1,26 +1,100 @@
-import enum
-import random
-from rest_framework_simplejwt.tokens import RefreshToken
-from django.contrib.auth.models import AbstractUser, UserManager
-from django.core.mail import send_mail
+from django.contrib.auth.models import AbstractUser
 from django.core.validators import (
-    MaxValueValidator, MinValueValidator, RegexValidator,
+    MaxValueValidator, MinValueValidator, RegexValidator
 )
 from django.db import models
-# Нет файла validators, откуда импорт?
-# а куда regex_validator используем??
-from validators import regex_validator, validate_username
-from django.contrib.auth import get_user_model
+from django.conf import settings
 
-
+from .validators import validate_year
 CHARS_TO_SHOW = 15
-User = get_user_model()
+
+
+class User(AbstractUser):
+    username = models.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Имя пользователя',
+        unique=True,
+        blank=False,
+        null=False,
+        validators=(
+            RegexValidator(
+                regex=r'^[\w.@+-]+$',
+                message='Имя пользователя содержит недопустимый символ'),
+        ),
+    )
+    email = models.EmailField(
+        max_length=settings.EMAIL_LENGTH,
+        verbose_name='Email',
+        unique=True,
+        blank=False,
+        null=False,
+    )
+    role = models.CharField(
+        max_length=settings.ROLE_LENGTH,
+        choices=settings.ROLE_CHOICES,
+        verbose_name='Фамилия',
+        default='user',
+        blank=False,
+        null=False,
+    )
+    bio = models.TextField(
+        verbose_name='О себе',
+        blank=True,
+    )
+    first_name = models.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Имя',
+        blank=True,
+    )
+    last_name = models.CharField(
+        max_length=settings.USERNAME_LENGTH,
+        verbose_name='Фамилия',
+        null=True,
+    )
+
+    confirmation_code = models.CharField(
+        max_length=settings.CONFIRMATION_CODE_LENGTH,
+        verbose_name='Фамилия',
+        null=True,
+        blank=False,
+    )
+    is_activated = models.BooleanField(
+        default=False,
+        verbose_name='Статус активации',
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'],
+                name='unique_username_email',
+            ),
+        ]
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_admin(self):
+        return any(
+            [self.role == 'admin', self.is_superuser],
+        )
+
+    @property
+    def is_moderator(self):
+        return self.role == settings.MODERATOR
 
 
 class Category(models.Model):
     name = models.CharField('Категория', max_length=200)
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField()
+    slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "Категория"
+        verbose_name_plural = "Категории"
 
     def __str__(self):
         return self.name
@@ -28,120 +102,52 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField('Жанр', max_length=200)
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField()
+    slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name = "Жанр"
+        verbose_name_plural = "Жанры"
 
     def __str__(self):
         return self.name
 
 
-class Titles(models.Model):
-    title = models.CharField('Название произведения', max_length=200)
-    year = models.IntegerField('Дата выхода')
+class Title(models.Model):
+    name = models.CharField(
+        'название',
+        max_length=200,
+        db_index=True
+    )
+    year = models.IntegerField(
+        'год',
+        validators=(validate_year, )
+    )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Название',
-        blank=True,
-        null=True
+        verbose_name='категория',
+        null=True,
+        blank=True
     )
-    genre = models.ForeignKey(
+    description = models.TextField(
+        'описание',
+        max_length=255,
+        null=True,
+        blank=True
+    )
+    genre = models.ManyToManyField(
         Genre,
-        on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='Жанр',
-        blank=True,
-        null=True
+        verbose_name='жанр'
     )
-    description = models.TextField()
+
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
 
     def __str__(self):
-        return self.title
-
-
-class ROLE_LIST(enum.Enum):
-    admin = 'admin'
-    user = 'user'
-    moderator = 'moderator'
-
-
-class CustomUserManager(UserManager):
-    def create_user(self, username, email, password=None, **extra_fields):
-        """
-        Создает и возвращает пользователя с email, паролем, именем
-        и отправляет confirmation code на почту для дальнейшего получения
-        jwt токена.
-        """
-        if username is None:
-            raise TypeError('Пользователь должен иметь username.')
-        if email is None:
-            raise TypeError('Пользователь должен иметь email.')
-        user = self.model(
-            username=username,
-            email=self.normalize_email(email),
-            confirmation_code=random.randint(100000000, 999999999),
-            **extra_fields,
-        )
-        user.set_password(password)
-        user.save()
-        send_mail(
-            'Ключ для вашего аккаунта',
-            f'Для получения токена воспользуйтесь ключём:'
-            f'{user.confirmation_code}',
-            'yamdb@example.com',
-            [email],
-            fail_silently=False,
-        )
-        return user
-
-    def create_superuser(self, username, email, password, **extra_fields):
-        """
-        Создает и возвращает суперпользователя с email, паролем, именем
-        и присваивае суперпользователю роль admin.
-        """
-        extra_fields.setdefault('is_staff', True)
-        extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('role', 'admin')
-        if extra_fields.get('is_staff') is not True:
-            raise ValueError('Superuser must have is_staff=True.')
-        if extra_fields.get('is_superuser') is not True:
-            raise ValueError('Superuser must have is_superuser=True.')
-        if extra_fields.get('username') == 'me':
-            raise ValueError('Имя "me" недопускается!')
-        return self.create_user(username, email, password, **extra_fields)
-
-
-class User(AbstractUser):
-    username = models.CharField(
-        max_length=150,
-        verbose_name='Логин',
-        help_text='Укажите логин',
-        unique=True,
-        validators=[RegexValidator(regex=r'^[\w.@+-]+$'), validate_username]
-    )
-
-    bio = models.TextField(
-        'Биография',
-        blank=True,
-    )
-    role = models.CharField(
-        'Роль пользователя',
-        choices=[(role.value, role.name) for role in ROLE_LIST],
-        max_length=10,
-        default='user'
-    )
-    confirmation_code = models.CharField(
-        'Код подтверждения', max_length=9, blank=True
-    )
-    email = models.EmailField('Почта', max_length=254, unique=True)
-    first_name = models.CharField('Имя', max_length=150, blank=True)
-    last_name = models.CharField('Фамилия', max_length=150, blank=True)
-    objects = CustomUserManager()
-
-    def create_jwt_token(self):
-        refresh = RefreshToken.for_user(self)
-        return str(refresh.access_token)
+        return self.name
 
 
 class Review(models.Model):
@@ -166,7 +172,7 @@ class Review(models.Model):
     pub_date = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
     title = models.ForeignKey(
-        Titles,
+        Title,
         on_delete=models.CASCADE,
         verbose_name="произведение",
         related_name="reviews"
@@ -175,6 +181,11 @@ class Review(models.Model):
     class Meta:
         verbose_name = "Отзыв"
         verbose_name_plural = "Отзывы"
+        constraints = [
+            models.UniqueConstraint(
+                fields=('title', 'author', ),
+                name='unique review'
+            )]
 
     def __str__(self):
         return f'{self.text[:20]} для {self.title}'
@@ -199,5 +210,3 @@ class Comment(models.Model):
 
     def __str__(self):
         return f'{self.text[:20]} для {self.review}'
-
-#прошу не обращать внимания

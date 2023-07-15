@@ -1,58 +1,62 @@
 from rest_framework import permissions
-from rest_framework.permissions import BasePermission
-# В моделях нет Comment и Review
-from reviews.models import ROLE_LIST, Comment, Review, User
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
-    '''Если запрос не get, head, options,
-    то права даются только админу'''
+class AdminOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated
+            and request.user.is_admin
+        )
+
+
+class IsAdminUserOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.method in permissions.SAFE_METHODS
+            or request.user.is_authenticated
+            and request.user.is_admin
+        )
+
+
+class AdminModeratorAuthorPermission(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-
-        return bool(request.user and request.user.is_staff)
-
-
-class OnlyAdminPermission(BasePermission):
-    """Полное разрешение для admin и GET запросы для anon."""
-
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return ((request.user.is_authenticated
-                and request.user.role == ROLE_LIST.admin.value)
-                or request.user.is_superuser)
-
-
-class CustomPermission(BasePermission):
-    """Разрешение на всё views, кроме 'только для admin'"""
-
-    def has_permission(self, request, view):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return request.user.is_authenticated
+        if request.method == 'POST':
+            return request.user.is_authenticated
+        return True
 
     def has_object_permission(self, request, view, obj):
         if request.method in permissions.SAFE_METHODS:
             return True
-        if obj.author == request.user or isinstance(obj, User):
-            return True
-        if request.user.role == ROLE_LIST.moderator.value and isinstance(
-            obj,
-            (Review, Comment)
-        ):
-            return True
-        if (request.user.role == ROLE_LIST.admin.value
-                or request.user.is_superuser):
-            return True
-        return False
+        return request.user.is_authenticated and (
+            request.user == obj.author
+            or request.user.is_moderator
+            or request.user.is_admin
+        )
 
 
-class AdminPermission(BasePermission):
-    """Полное разрешение для admin."""
-
+class IsAuthenticatedOrReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
-        return ((request.user.is_authenticated
-                and request.user.role == ROLE_LIST.admin.value)
-                or request.user.is_superuser)
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return request.user.is_authenticated
+
+
+class AdminModeratorAuthorPermission(permissions.BasePermission):
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        if request.method == 'POST':
+            return request.user.is_authenticated
+        return True
+
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return request.user.is_authenticated and (
+            request.user == obj.author
+            or request.user.is_moderator
+            or request.user.is_admin
+        )
