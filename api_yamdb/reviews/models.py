@@ -90,7 +90,7 @@ class User(AbstractUser):
 
 class Category(models.Model):
     name = models.CharField('Категория', max_length=200)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
         verbose_name = "Категория"
@@ -102,14 +102,14 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField('Жанр', max_length=200)
-    slug = models.SlugField(max_length=100, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     class Meta:
         verbose_name = "Жанр"
         verbose_name_plural = "Жанры"
 
     def __str__(self):
-        return f'{self.name} {self.name}'
+        return self.name
 
 
 class Titles(models.Model):

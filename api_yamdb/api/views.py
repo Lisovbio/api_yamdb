@@ -14,6 +14,7 @@ from django.core.mail import send_mail
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Titles, Review, User
 from api.filter import TitleFilter
+from .mixins import ListCreateDestroyViewSet
 from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
     IsAuthenticatedOrReadOnly
 from .serializers import CategorySerializer, GenreSerializer, \
@@ -58,7 +59,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     permission_classes = (IsAdminUserOrReadOnly,)
@@ -81,7 +82,7 @@ class TitleViewSet(viewsets.ModelViewSet):
         return TitleWriteSerializer
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminUserOrReadOnly,)

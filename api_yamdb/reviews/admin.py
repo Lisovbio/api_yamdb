@@ -5,10 +5,7 @@ from .models import Category, Comment, Genre, Review, Titles, User
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = (
-        'name',
-        'slug',
-    )
+    list_display = ('name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-'
