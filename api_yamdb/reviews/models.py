@@ -126,12 +126,12 @@ class Titles(models.Model):
         Category,
         on_delete=models.SET_NULL,
         related_name='titles',
-        verbose_name='категория',
+        verbose_name='Категория',
         null=True,
         blank=True
     )
     description = models.TextField(
-        'описание',
+        'Описание',
         max_length=255,
         null=True,
         blank=True
@@ -139,7 +139,7 @@ class Titles(models.Model):
     genre = models.ManyToManyField(
         Genre,
         related_name='titles',
-        verbose_name='жанр'
+        verbose_name='Жанр'
     )
 
     class Meta:
@@ -174,7 +174,7 @@ class Review(models.Model):
     title = models.ForeignKey(
         Titles,
         on_delete=models.CASCADE,
-        verbose_name="произведение",
+        verbose_name="Произведение",
         related_name="reviews"
     )
 
@@ -195,12 +195,12 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        verbose_name="Комментарии",
+        verbose_name="Отзыв",
         related_name="comments"
     )
 
     class Meta:
-        verbose_name = "Коммментарий"
+        verbose_name = "Комментарий"
         verbose_name_plural = "Комментарии"
 
     def __str__(self):

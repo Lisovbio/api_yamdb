@@ -1,5 +1,5 @@
 from django.urls import include, path
-from rest_framework.routers import SimpleRouter
+from rest_framework.routers import DefaultRouter
 
 from api.views import (
     CategoryViewSet,
@@ -15,14 +15,14 @@ from api.views import (
 apps_name = 'api'
 
 
-router = SimpleRouter()
-router.register('v1/categories', CategoryViewSet, basename='categories',)
-router.register('v1/genres', GenreViewSet, basename='genres')
-router.register('v1/users', UserViewSet, basename='users')
-router.register('v1/titles', TitleViewSet, basename='titles')
-router.register(r'v1/title/(?P<title_id>\d+)/reviews',
+router = DefaultRouter()
+router.register('v1/categories', CategoryViewSet)
+router.register('v1/genres', GenreViewSet)
+router.register('v1/users', UserViewSet)
+router.register('v1/titles', TitleViewSet)
+router.register(r'v1/titles/(?P<title_id>\d+)/reviews',
                 ReviewViewSet, basename='reviews')
-router.register(r'v1/title/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+router.register(r'v1/titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
                 CommentViewSet, basename='comments')
 
 
