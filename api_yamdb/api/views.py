@@ -1,26 +1,28 @@
+from api.filter import TitleFilter
+from django.conf import settings
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
+from django.db import IntegrityError
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from django.conf import settings
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
-from rest_framework.views import APIView
-from django.contrib.auth.tokens import default_token_generator
-from rest_framework import status, viewsets
-from django.db import IntegrityError
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from django.core.mail import send_mail
+from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
-from reviews.models import Category, Genre, Title, Review, User
-from api.filter import TitleFilter
+from reviews.models import Category, Genre, Review, Title, User
+
 from .mixins import ListCreateDestroyViewSet
-from .permissions import AdminOnly, IsAdminUserOrReadOnly, \
-    AdminModeratorAuthorPermission
-from .serializers import CategorySerializer, GenreSerializer, \
-    TitleReadSerializer, TitleWriteSerializer, CommentSerializer, \
-    ReviewSerializer, UserSerializer, GetTokenSerializer, SignUpSerializer, \
-    NotAdminSerializer
+from .permissions import (AdminModeratorAuthorPermission, AdminOnly,
+                          IsAdminUserOrReadOnly)
+from .serializers import (CategorySerializer, CommentSerializer,
+                          GenreSerializer, GetTokenSerializer,
+                          NotAdminSerializer, ReviewSerializer,
+                          SignUpSerializer, TitleReadSerializer,
+                          TitleWriteSerializer, UserSerializer)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -40,32 +42,29 @@ class UserViewSet(viewsets.ModelViewSet):
     )
     def get_current_user_info(self, request):
         serializer = UserSerializer(request.user)
-        if request.method == 'PATCH':
-            if request.user.is_admin:
-                serializer = UserSerializer(
-                    request.user,
-                    data=request.data,
-                    partial=True
-                )
-            else:
-                serializer = NotAdminSerializer(
-                    request.user,
-                    data=request.data,
-                    partial=True
-                )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.data)
+
+        if request.method != 'PATCH':
+            return Response(serializer.data)
+
+        if request.user.is_admin:
+            serializer_class = UserSerializer
+        else:
+            serializer_class = NotAdminSerializer
+
+        updated_serializer = serializer_class(
+            instance=request.user,
+            data=request.data,
+            partial=True
+        )
+        updated_serializer.is_valid(raise_exception=True)
+        updated_serializer.save()
+
+        return Response(updated_serializer.data, status=status.HTTP_200_OK)
 
 
 class CategoryViewSet(ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (SearchFilter, )
-    search_fields = ('name', )
-    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
@@ -85,10 +84,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 class GenreViewSet(ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminUserOrReadOnly,)
-    filter_backends = (SearchFilter,)
-    search_fields = ('name', )
-    lookup_field = 'slug'
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -165,26 +160,26 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        try:
-            user, created = User.objects.get_or_create(
-                username=serializer.validated_data.get('username'),
-                email=serializer.validated_data.get('email'),
-            )
-            if not created:
-                if user.is_activated:
-                    return Response(
-                        status=status.HTTP_400_BAD_REQUEST,
-                    )
-                else:
-                    self.send_confirmation_code(user)
-                    return Response(
-                        'Новый код подтверждения отправлен на вашу почту.',
-                        status=status.HTTP_200_OK,
-                    )
-        except IntegrityError:
-            return Response(
-                'Имя пользователя или email уже заняты.',
-                status=status.HTTP_400_BAD_REQUEST,
-            )
+        # try:
+        user, created = User.objects.get_or_create(
+            username=serializer.validated_data.get('username'),
+            email=serializer.validated_data.get('email'),
+        )
+        if not created:
+            if user.is_activated:
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            else:
+                self.send_confirmation_code(user)
+                return Response(
+                    'Новый код подтверждения отправлен на вашу почту.',
+                    status=status.HTTP_200_OK,
+                )
+        # except IntegrityError:
+        #     return Response(
+        #         'Имя пользователя или email уже заняты.',
+        #         status=status.HTTP_400_BAD_REQUEST,
+        #     )
         self.send_confirmation_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)

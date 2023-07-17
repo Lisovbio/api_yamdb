@@ -5,9 +5,8 @@ from django.utils import timezone
 
 
 def validate_username(value):
-    if value == 'me':
+    if value.lower() == 'me':
         raise ValidationError('Имя пользователя не может быть "me".')
-    # Удаление всех валидных символов из полученного значения
     invalid_chars = re.sub(r'[a-zA-Z0-9-_\.]', '', value)
     if invalid_chars:
         raise ValidationError(

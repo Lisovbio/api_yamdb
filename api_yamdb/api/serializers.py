@@ -1,12 +1,11 @@
-from rest_framework import serializers
 from django.conf import settings
 from django.core.exceptions import ValidationError
-
 from django.core.validators import RegexValidator
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
+
 from reviews.models import Category, Comment, Genre, Review, Title, User
 from reviews.validators import validate_username
-from rest_framework.validators import UniqueValidator
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -131,16 +130,6 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name', 'bio', 'role',)
         model = User
 
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя me нельзя использовать'
-            )
-        if User.objects.filter(username=value).exists():
-            return serializers.ValidationError(
-                'Пользователя с таким именем уже существует')
-        return value
-
     def validate_email(self, value):
         if User.objects.filter(email=value).exists():
             return serializers.ValidationError(
@@ -158,13 +147,6 @@ class UserRegistrationSerializer(serializers.Serializer):
         required=True,
         max_length=254,
     )
-
-    def validate_username(self, value):
-        if value == 'me':
-            raise serializers.ValidationError(
-                'Имя me нельзя использовать'
-            )
-        return value
 
 
 class UserTokenSerializer(serializers.ModelSerializer):
@@ -206,14 +188,10 @@ class CommentSerializer(serializers.ModelSerializer):
         read_only_fields = ('review',)
 
 
-class SignUpSerializer(serializers.ModelSerializer):
+class SignUpSerializer(serializers.Serializer):
     username = serializers.CharField(
         max_length=settings.USERNAME_LENGTH,
-        validators=(
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message='Имя пользователя содержит недопустимый символ'),
-        ),
+        validators=(validate_username,),
         required=True,
     )
     email = serializers.EmailField(
@@ -225,12 +203,21 @@ class SignUpSerializer(serializers.ModelSerializer):
         model = User
         fields = ('username', 'email')
 
-    def validate_username(self, user):
-        if user.lower() == 'me':
-            raise serializers.ValidationError(
-                'Пользователь me не может быть создан',
-            )
-        return user
+    def validate(self, data): 
+        email = data.get('email') 
+        username = data.get('username') 
+        existing_username = User.objects.filter(username=username).exists() 
+        existing_email = User.objects.filter(email=email).exists() 
+        
+        if existing_username and not existing_email: 
+            raise serializers.ValidationError( 
+                'Пользоваль зарегистрирован с другой почтой'
+            ) 
+        if existing_email and not existing_username: 
+            raise serializers.ValidationError( 
+                'Пользователь зарегистрирован с другим логином'
+            ) 
+        return data
 
 
 class NotAdminSerializer(serializers.ModelSerializer):

@@ -1,26 +1,21 @@
-from django.contrib.auth.models import AbstractUser
-from django.core.validators import (
-    MaxValueValidator, MinValueValidator, RegexValidator
-)
-from django.db import models
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+from django.core.validators import (MaxValueValidator, MinValueValidator)
+from django.db import models
 
-from .validators import validate_year
+from .validators import validate_year, validate_username
+
 CHARS_TO_SHOW = 15
 
 
 class User(AbstractUser):
     username = models.CharField(
+        validators=(validate_username,),
         max_length=settings.USERNAME_LENGTH,
         verbose_name='Имя пользователя',
         unique=True,
         blank=False,
-        null=False,
-        validators=(
-            RegexValidator(
-                regex=r'^[\w.@+-]+$',
-                message='Имя пользователя содержит недопустимый символ'),
-        ),
+        null=False
     )
     email = models.EmailField(
         max_length=settings.EMAIL_LENGTH,
@@ -33,7 +28,7 @@ class User(AbstractUser):
         max_length=settings.ROLE_LENGTH,
         choices=settings.ROLE_CHOICES,
         verbose_name='Фамилия',
-        default='user',
+        default=settings.USER,
         blank=False,
         null=False,
     )
@@ -54,7 +49,7 @@ class User(AbstractUser):
 
     confirmation_code = models.CharField(
         max_length=settings.CONFIRMATION_CODE_LENGTH,
-        verbose_name='Фамилия',
+        verbose_name='Код подтверждения',
         null=True,
         blank=False,
     )
@@ -80,7 +75,7 @@ class User(AbstractUser):
     @property
     def is_admin(self):
         return any(
-            [self.role == 'admin', self.is_superuser],
+            [self.role == settings.ADMIN, self.is_superuser],
         )
 
     @property
