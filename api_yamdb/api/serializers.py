@@ -203,20 +203,20 @@ class SignUpSerializer(serializers.Serializer):
         model = User
         fields = ('username', 'email')
 
-    def validate(self, data): 
-        email = data.get('email') 
-        username = data.get('username') 
-        existing_username = User.objects.filter(username=username).exists() 
-        existing_email = User.objects.filter(email=email).exists() 
-        
-        if existing_username and not existing_email: 
-            raise serializers.ValidationError( 
+    def validate(self, data):
+        email = data.get('email')
+        username = data.get('username')
+        existing_username = User.objects.filter(username=username).exists()
+        existing_email = User.objects.filter(email=email).exists()
+
+        if existing_username and not existing_email:
+            raise serializers.ValidationError(
                 'Пользоваль зарегистрирован с другой почтой'
-            ) 
-        if existing_email and not existing_username: 
-            raise serializers.ValidationError( 
+            )
+        if existing_email and not existing_username:
+            raise serializers.ValidationError(
                 'Пользователь зарегистрирован с другим логином'
-            ) 
+            )
         return data
 
 

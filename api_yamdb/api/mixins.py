@@ -2,6 +2,7 @@ from rest_framework import filters, mixins, viewsets
 
 from .permissions import IsAdminUserOrReadOnly
 
+
 class ListCreateDestroyViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
