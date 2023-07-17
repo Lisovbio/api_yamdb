@@ -160,7 +160,6 @@ class SignUpView(APIView):
     def post(self, request):
         serializer = SignUpSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        # try:
         user, created = User.objects.get_or_create(
             username=serializer.validated_data.get('username'),
             email=serializer.validated_data.get('email'),
@@ -176,10 +175,5 @@ class SignUpView(APIView):
                     'Новый код подтверждения отправлен на вашу почту.',
                     status=status.HTTP_200_OK,
                 )
-        # except IntegrityError:
-        #     return Response(
-        #         'Имя пользователя или email уже заняты.',
-        #         status=status.HTTP_400_BAD_REQUEST,
-        #     )
         self.send_confirmation_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
