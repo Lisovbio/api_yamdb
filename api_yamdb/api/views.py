@@ -168,11 +168,11 @@ class SignUpView(APIView):
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            else:
-                self.send_confirmation_code(user)
-                return Response(
-                    'Новый код подтверждения отправлен на вашу почту.',
-                    status=status.HTTP_200_OK,
-                )
+            # else:
+            #     self.send_confirmation_code(user)
+            #     return Response(
+            #         'Новый код подтверждения отправлен на вашу почту.',
+            #         status=status.HTTP_200_OK,
+            #     )
         self.send_confirmation_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
