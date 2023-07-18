@@ -1,4 +1,3 @@
-from api.filter import TitleFilter
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
@@ -14,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title, User
 
+from api.filter import TitleFilter
 from .mixins import ListCreateDestroyViewSet
 from .permissions import (AdminModeratorAuthorPermission, AdminOnly,
                           IsAdminUserOrReadOnly)
@@ -168,11 +168,5 @@ class SignUpView(APIView):
                 return Response(
                     status=status.HTTP_400_BAD_REQUEST,
                 )
-            # else:
-            #     self.send_confirmation_code(user)
-            #     return Response(
-            #         'Новый код подтверждения отправлен на вашу почту.',
-            #         status=status.HTTP_200_OK,
-            #     )
         self.send_confirmation_code(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
